@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import splitName from "../utils/splitName";
 import {
@@ -14,6 +14,7 @@ import { addUserPlayer } from "../slices/citiesSlice";
 import { changeTeamStatus, userOfferedContract } from "../slices/playersSlice";
 
 import Image from "./Image";
+import useUserTeam from "../hooks/useUserTeam";
 
 function ContractList({
   contracts,
@@ -30,14 +31,24 @@ function ContractList({
     } else return [];
   }, [contracts]);
 
+  const team = useUserTeam();
+
+  useEffect(() => {
+    if (Object.values(team.roster).filter((pos) => pos !== null).length === 5) {
+      for (const contract of userContracts) {
+        if (contract.status === "decision") {
+          handleUserContractDeclined(contract.contractID);
+        }
+      }
+    }
+  }, [team]);
+
   function handleAccepted(contract) {
-    handleContract(contract.contractID);
     handleUserContractAccepted(contract.contractID);
     addUserPlayer({ teamID: contract.team.cityID, player: contract.player });
   }
 
   function handleDeclined(contract) {
-    handleContract(contract.contractID);
     handleUserContractDeclined(contract.contractID);
     changeTeamStatus(contract.player.playerID);
     userOfferedContract(contract.player.playerID);

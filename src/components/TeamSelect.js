@@ -803,7 +803,7 @@ function TeamSelect({ generateLeague, players, addUserInfo, setCenter }) {
   }
 
   function handleTeamSelect() {
-    let cityChoice = cities[selectedRow];
+    let cityChoice = cities[selectedRow - 1];
     addUserInfo({ chosenCity: cityChoice, players: players });
     setCenter(cityChoice);
     generateLeague({ id: cityChoice.cityID });
@@ -852,8 +852,8 @@ function TeamSelect({ generateLeague, players, addUserInfo, setCenter }) {
                     <td className="end">
                       <input
                         type="checkbox"
-                        checked={selectedRow === idx}
-                        onChange={() => setSelectedRow(idx)}
+                        checked={selectedRow - 1 === idx}
+                        onChange={() => setSelectedRow(idx + 1)}
                       />
                     </td>
                   </tr>
