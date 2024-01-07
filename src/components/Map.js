@@ -22,7 +22,7 @@ import MapHeader from "./MapHeader";
 function Map({ map, league, setZoom, players, setCluster, cities }) {
   console.log("Map Render");
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "AIzaSyDh2CKcsEJ5EorZkWPfQmKi8Z_u7A_HLJk",
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API,
   });
 
   const mapRef = useRef();
