@@ -7,7 +7,6 @@ import {
   faHome,
   faArrowLeft,
   faArrowRight,
-  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
 // Redux
@@ -15,7 +14,6 @@ import { connect } from "react-redux";
 import useUserTeam from "../hooks/useUserTeam";
 
 function MapHeader({ cities, mapRef }) {
-  console.log("Map Header Render");
   const [mapIndex, setMapIndex] = useState(29);
   const [teamIndex, setTeamIndex] = useState(null);
 
@@ -71,10 +69,6 @@ function MapHeader({ cities, mapRef }) {
           onClick={() => handleNextClick()}
           className="map-header-icons"
         />
-      </div>
-      <div className="map-header-arrow-nav">
-        <FontAwesomeIcon icon={faUser} />
-        <div>120</div>
       </div>
     </div>
   );

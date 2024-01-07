@@ -19,8 +19,8 @@ export const sidebarData = [
     title: "Team",
     info: "View your currently active team. As part of your coach / general manager position you are able to change which position your player fills.",
   },
-  {
-    title: "Activity Log",
-    info: "View the activity of teams and players in the league. ADD A SEARCH BAR",
-  },
+  // {
+  //   title: "Activity Log",
+  //   info: "View the activity of teams and players in the league. ADD A SEARCH BAR",
+  // },
 ];
