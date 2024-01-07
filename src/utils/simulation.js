@@ -1,36 +1,23 @@
-import { getAvailablePlayers } from "./mapFuncitons";
-import { addTrip, handleTrip } from "../slices/tripsSlice";
-import { addScoutedCity, rosterPlayer } from "../slices/citiesSlice";
-import {
-  addContract,
-  handleContract,
-  handleUserContractChosen,
-} from "../slices/contractsSlice";
+import createTrip from "./tripHelper";
+import scoreContract from "./scoreContract";
+import { getAvailablePlayers } from "./mapHelper";
+import { v4 as uuidv4 } from "uuid";
 
-import { changeTeamStatus } from "../slices/playersSlice";
-import {
-  handleCPURetractContract,
-  handleUserContractNotChosen,
-  handleUserContractAccepted,
-} from "../slices/contractsSlice";
-
-import store from "../store/store";
-
-export const handleNewTrips = (trips, cities, day) => {
-  // console.log("Starting to handle new trips");
-
+export function handleNewTrips(cities, trips, day) {
+  // New Trips Started
   let leagueCities = cities.filter((city) => city.hasTeam && !city.userTeam);
-  // - Get teams which have no active trips
+
   let tripsNeeded = leagueCities.filter(
     (city) =>
       !trips.some(
         (trip) => trip.team.cityID === city.cityID && !trip.isFinished
       ) && !city.userTeam
   );
-  // - Start a trip for the teams who need it
-  tripsNeeded.forEach((team) => {
-    // console.log("Scouting trip needed for " + team.name, team);
 
+  // Create a new array instead of modifying the existing one
+  const newTrips = [...trips];
+
+  tripsNeeded.forEach((team) => {
     let availableTrips = cities.filter(
       (city) =>
         !team.scoutedCities.some(
@@ -41,47 +28,61 @@ export const handleNewTrips = (trips, cities, day) => {
     let randomCityIndex = Math.floor(Math.random() * availableTrips.length);
     let randomCity = availableTrips[randomCityIndex];
 
-    // - Add Trip
-    let tripPayload = {
-      team: team,
-      city: randomCity,
-      day: day,
-    };
-
-    // console.log("Dispatching trip payload to store");
-
-    store.dispatch(addTrip(tripPayload));
+    let trip = createTrip(team, randomCity, day, newTrips);
+    console.log("Adding trip: ", trip);
+    newTrips.push(trip);
   });
-};
 
-export const handleFinishedTrips = (trips, day) => {
-  // - Filter trips that are finished
-  let finishedTrips = trips.filter((trip) => trip.finishDay === day);
+  return newTrips;
+
+  // New Trips Finished
+}
+
+export function handleFinishedTrips(trips, cities, day) {
+  let newTrips = [...trips];
+  let newCities = [...cities];
+
+  // Finished Trips Started
+  let finishedTrips = newTrips.filter((trip) => trip.finishDay === day);
 
   // - For each trip
   for (const trip of finishedTrips) {
+    console.log("Finishing trip: ", trip);
     // Mark trip handled
-    store.dispatch(handleTrip(trip.tripID));
+    newTrips = newTrips.map((loopTrip) =>
+      loopTrip.tripID === trip.tripID
+        ? { ...loopTrip, isFinished: true }
+        : loopTrip
+    );
 
     // Add scouted city to teams scouted list
-    let cityPayload = {
-      id: trip.team.cityID,
-      city: { cityID: trip.city.cityID, location: trip.city.location },
-    };
+    let id = trip.team.cityID;
+    let city = { cityID: trip.city.cityID, location: trip.city.location };
 
-    store.dispatch(addScoutedCity(cityPayload));
+    newCities = newCities.map((currentCity) =>
+      currentCity.cityID === id
+        ? {
+            ...currentCity,
+            scoutedCities: [...currentCity.scoutedCities, city],
+          }
+        : currentCity
+    );
   }
-};
 
-export const handleFinishedContracts = (contracts, day) => {
-  // - Filter finished contracts
+  return { finishedTrips: newTrips, newCities: newCities };
+
+  // Finished Trips Finished
+}
+
+export function handleFinishedContracts(contracts, players, day, cities) {
+  // Started Contracts Finished
   const finishedContracts = contracts.filter(
     (contract) => contract.finishDay === day && !contract.isHandled
   );
 
-  // - Loop through contracts
   let handledContracts = []; // Track contracts to skip if multiple contracts for players are finished
-  let playerIDs = [];
+  let playerIds = [];
+
   finishedContracts.forEach((contract) => {
     if (
       !handledContracts.some((hContract) => hContract === contract.contractID) // If contract is already finished skip
@@ -101,7 +102,7 @@ export const handleFinishedContracts = (contracts, day) => {
           samePlayerContracts[0]
         );
 
-        playerIDs.push(chosenContract.player.playerID);
+        playerIds.push(chosenContract.player.playerID);
 
         // Handle all not chosen contracts
         samePlayerContracts.forEach((pContract) => {
@@ -109,27 +110,52 @@ export const handleFinishedContracts = (contracts, day) => {
             if (pContract.team.userTeam) {
               // Chosen Contract User's Team
               handledContracts.push(pContract.contractID); // Local
-              store.dispatch(handleContract(pContract.contractID));
-              store.dispatch(handleUserContractChosen(pContract.contractID)); // State
+              contracts = contracts.map((con) =>
+                con.contractID === pContract.contractID
+                  ? { ...con, isHandled: true, status: "decision" }
+                  : con
+              );
 
               // Player
-              store.dispatch(changeTeamStatus(contract.player.playerID));
+              players = players.map((player) =>
+                player.playerID === contract.player.playerID
+                  ? { ...player, isWithoutTeam: !player.isWithoutTeam }
+                  : player
+              );
             } else {
               // Chosen Contract CPU Team
               // Contract
               handledContracts.push(pContract.contractID); // Local
-              store.dispatch(handleContract(pContract.contractID));
-              store.dispatch(handleUserContractAccepted(pContract.contractID)); // State
+              contracts = contracts.map((con) =>
+                con.contractID === pContract.contractID
+                  ? { ...con, isHandled: true, status: "accepted" }
+                  : con
+              );
 
               // Player
-              store.dispatch(changeTeamStatus(pContract.player.playerID));
+              players = players.map((player) =>
+                player.playerID === contract.player.playerID
+                  ? { ...player, isWithoutTeam: !player.isWithoutTeam }
+                  : player
+              );
               // Team
-              let signPayload = {
-                teamID: pContract.team.cityID,
-                player: pContract.player,
-              };
 
-              store.dispatch(rosterPlayer(signPayload));
+              let teamID = pContract.team.cityID;
+              let player = pContract.player;
+
+              cities = cities.map((team) => {
+                if (team.cityID === teamID) {
+                  return {
+                    ...team,
+                    roster: {
+                      ...team.roster,
+                      [player.position]: player,
+                    },
+                  };
+                } else {
+                  return team;
+                }
+              });
 
               //Remove teams contracts in that position
               let otherTeamContracts = contracts.filter(
@@ -142,35 +168,43 @@ export const handleFinishedContracts = (contracts, day) => {
               if (otherTeamContracts.length > 0) {
                 otherTeamContracts.forEach((tCon) => {
                   handledContracts.push(tCon.contractID); // Local
-                  store.dispatch(handleContract(tCon.contractID));
-                  store.dispatch(handleCPURetractContract(tCon.contractID)); // State
+                  contracts = contracts.map((con) =>
+                    con.contractID === tCon.contractID
+                      ? { ...con, isHandled: true, status: "retracted" }
+                      : con
+                  );
                 });
               }
             }
           } else {
             // Not Chosen Contract
             handledContracts.push(pContract.contractID); // Local
-            store.dispatch(handleContract(pContract.contractID));
-            store.dispatch(handleUserContractNotChosen(pContract.contractID)); // State
+            contracts = contracts.map((con) =>
+              con.contractID === pContract.contractID
+                ? { ...con, isHandled: true, status: "rejected" }
+                : con
+            );
           }
         });
       }
     }
   });
 
-  return playerIDs;
-};
+  return {
+    finishedContracts: contracts,
+    finishedPlayers: players,
+    newerCities: cities,
+    playerIds: playerIds,
+  };
+  // Finished Contracts Finished
+}
 
-export const handleNewContracts = (
-  contracts,
-  cities,
-  players,
-  day,
-  freshPlayerIds
-) => {
-  let leagueCities = cities.filter((city) => city.hasTeam && !city.userTeam);
+export function handleNewContracts(cities, contracts, players, playerIds, day) {
+  console.log("In Handle New Contracts");
+  // New Contracts Started
+  const leagueCities = cities.filter((city) => city.hasTeam && !city.userTeam);
 
-  let filteredTeams = leagueCities.filter((team) => {
+  const filteredTeams = leagueCities.filter((team) => {
     return (
       contracts.filter(
         (contract) =>
@@ -179,16 +213,18 @@ export const handleNewContracts = (
     );
   });
 
+  const newContracts = [...contracts]; // Create a copy of contracts array
+
   filteredTeams.forEach((team) => {
-    let neededContracts =
+    const neededContracts =
       3 -
-      contracts.filter(
+      newContracts.filter(
         (contract) =>
           contract.team.cityID === team.cityID && !contract.isHandled
       ).length;
 
     // - - Get needed positions
-    let positions = Object.keys(team.roster).filter(
+    const positions = Object.keys(team.roster).filter(
       (position) => team.roster[position] === null
     );
 
@@ -197,20 +233,62 @@ export const handleNewContracts = (
     teamsAvailablePlayers = teamsAvailablePlayers.filter(
       (player) =>
         positions.some((pos) => pos === player.position) &&
-        !freshPlayerIds.some((p) => p.playerID === player.playerID)
+        !playerIds.some((p) => p.playerID === player.playerID)
     );
 
     for (let x = 0; x < neededContracts; x++) {
       if (teamsAvailablePlayers[x]) {
-        let payload = {
+        const contract = {
+          contractID: uuidv4(),
           team: team,
           player: teamsAvailablePlayers[x],
-          day: day,
+          finishDay: day + Math.floor(Math.random() * 8) + 3,
+          score: scoreContract(team, teamsAvailablePlayers[x]),
+          isHandled: false,
+          status: "pending",
         };
 
-        store.dispatch(addContract(payload));
-      } else {
+        newContracts.push(contract);
       }
     }
   });
-};
+
+  // New Contracts Finished
+  return newContracts;
+}
+
+export function finishSimulation(trips, cities, contracts, players, day) {
+  let newTrips = handleNewTrips(cities, trips, day);
+  let { finishedTrips, newCities } = handleFinishedTrips(newTrips, cities, day);
+  let { finishedContracts, finishedPlayers, newerCities, playerIds } =
+    handleFinishedContracts(contracts, players, day, newCities);
+  let newContracts = handleNewContracts(
+    newerCities,
+    finishedContracts,
+    finishedPlayers,
+    playerIds,
+    day
+  );
+
+  let leagueTeams = newerCities.filter((city) => city.hasTeam);
+
+  if (
+    leagueTeams.every(
+      (team) =>
+        Object.values(team.roster).filter((pos) => pos !== null).length === 5
+    )
+  ) {
+    let unSignedPlayers = finishedPlayers.filter(
+      (player) => player.isWithoutTeam
+    );
+    return { finishedLeague: leagueTeams, unSignedPlayers: unSignedPlayers };
+  } else {
+    return finishSimulation(
+      finishedTrips,
+      newerCities,
+      newContracts,
+      finishedPlayers,
+      day + 1
+    );
+  }
+}

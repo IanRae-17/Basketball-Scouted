@@ -1,8 +1,7 @@
-import { calculateDistance } from "../utils/mapFuncitons";
-import calculateScoutTime from "../utils/calculateScoutTime";
+import { calculateDistance } from "./mapHelper";
 import { v4 as uuidv4 } from "uuid";
 
-function createTrip(team, city, day, trips) {
+export default function createTrip(team, city, day, trips) {
   let distance = calculateDistance(team.location, city.location);
   let timeToScout = calculateScoutTime(distance);
 
@@ -34,4 +33,10 @@ function getLargestFinishDay(trips, team, day) {
   }
 }
 
-export default createTrip;
+export function calculateScoutTime(distance) {
+  const referenceDistance = 9935; // Reference distance in miles
+  const referenceTime = 20; // Reference time in days
+
+  const time = (distance * referenceTime) / referenceDistance;
+  return Math.ceil(time);
+}

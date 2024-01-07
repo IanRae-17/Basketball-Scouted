@@ -6,7 +6,6 @@ import splitName from "../utils/splitName";
 import {
   handleUserContractAccepted,
   handleUserContractDeclined,
-  handleContract,
 } from "../slices/contractsSlice";
 
 import { addUserPlayer } from "../slices/citiesSlice";
@@ -20,7 +19,6 @@ function ContractList({
   contracts,
   handleUserContractAccepted,
   handleUserContractDeclined,
-  handleContract,
   addUserPlayer,
   changeTeamStatus,
   userOfferedContract,
@@ -120,7 +118,6 @@ const mapStateToProps = (state) => {
 const mapStateToDispatch = {
   handleUserContractAccepted,
   handleUserContractDeclined,
-  handleContract,
   addUserPlayer,
   changeTeamStatus,
   userOfferedContract,

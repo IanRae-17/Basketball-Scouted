@@ -1,10 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { calculateDistance } from "../utils/mapFuncitons";
-import { getPlayersInRange } from "../utils/mapFuncitons";
-import calculateScoutTime from "../utils/calculateScoutTime";
-import addPlayerToRoster from "../utils/addPlayerToRoster";
-import swapPositions from "../utils/swapPositions";
+import { calculateDistance } from "../utils/mapHelper";
+import { getPlayersInRange } from "../utils/mapHelper";
+import { calculateScoutTime } from "../utils/tripHelper";
+import { addPlayerToRoster, swapPositions } from "../utils/cityHelper";
 
 const initialCityState = [
   {

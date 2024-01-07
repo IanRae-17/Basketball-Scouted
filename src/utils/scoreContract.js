@@ -1,4 +1,4 @@
-import { calculateDistance } from "./mapFuncitons";
+import { calculateDistance } from "./mapHelper";
 
 function scoreContract(team, player) {
   const referenceDistance = 12281; // Reference distance in miles

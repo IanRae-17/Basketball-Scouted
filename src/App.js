@@ -6,7 +6,7 @@ import BBALLIMAGE from "./assets/BBALL.png";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { sidebarData } from "./assets/explainer";
-import { getAvailablePlayers } from "./utils/mapFuncitons";
+import { getAvailablePlayers } from "./utils/mapHelper";
 
 // Components
 import ExplainerBox from "./components/ExplainerBox";
@@ -19,22 +19,16 @@ import InfoBox from "./components/InfoBox";
 
 // Redux
 import { connect } from "react-redux";
+import useUserTeam from "./hooks/useUserTeam";
+import { stepDay } from "./slices/simulationSlice";
+import FinishSimulation from "./components/FinishSimulation";
 import {
   handleFinishedContracts,
   handleFinishedTrips,
   handleNewContracts,
   handleNewTrips,
+  finishSimulation,
 } from "./utils/simulation";
-import useUserTeam from "./hooks/useUserTeam";
-import { stepDay } from "./slices/simulationSlice";
-import FinishSimulation from "./components/FinishSimulation";
-import {
-  local_handleFinishedContracts,
-  local_handleFinishedTrips,
-  local_handleNewContracts,
-  local_handleNewTrips,
-  local_finishSimulation,
-} from "./utils/nonStateSimulation";
 import { setCities } from "./slices/citiesSlice";
 import { setContracts } from "./slices/contractsSlice";
 import { setTrips } from "./slices/tripsSlice";
@@ -53,7 +47,6 @@ function App({
   setContracts,
   setPlayers,
 }) {
-  console.log("App Render");
   const [sideBarStatus, setSideBarStatus] = useState(
     new Array(sidebarData.length).fill(false)
   );
@@ -96,23 +89,18 @@ function App({
 
   function handleSimulateDay() {
     if (simulation.day > 0 && !finished) {
-      let newTrips = local_handleNewTrips(cities, trips, simulation.day);
+      let newTrips = handleNewTrips(cities, trips, simulation.day);
 
-      let { finishedTrips, newCities } = local_handleFinishedTrips(
+      let { finishedTrips, newCities } = handleFinishedTrips(
         newTrips,
         cities,
         simulation.day
       );
 
       let { finishedContracts, finishedPlayers, newerCities, playerIds } =
-        local_handleFinishedContracts(
-          contracts,
-          players,
-          simulation.day,
-          newCities
-        );
+        handleFinishedContracts(contracts, players, simulation.day, newCities);
 
-      let newContracts = local_handleNewContracts(
+      let newContracts = handleNewContracts(
         newerCities,
         finishedContracts,
         finishedPlayers,
@@ -130,7 +118,7 @@ function App({
   function handleFinishSimulation() {
     setFinished(true);
     setFinalPagePayload(
-      local_finishSimulation(trips, cities, contracts, players, simulation.day)
+      finishSimulation(trips, cities, contracts, players, simulation.day)
     );
   }
 

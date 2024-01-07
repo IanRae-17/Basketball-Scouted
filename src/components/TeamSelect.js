@@ -1,8 +1,6 @@
 import BBALLIMAGE from "../assets/BBALL.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-
 import { generateLeague } from "../slices/citiesSlice";
 import { addUserInfo } from "../slices/citiesSlice";
 import { setCenter } from "../slices/mapSlice";

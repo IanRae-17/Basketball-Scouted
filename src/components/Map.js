@@ -6,7 +6,7 @@ import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api";
 
 // Redux
 import { connect } from "react-redux";
-import { setZoom, setMapRef } from "../slices/mapSlice";
+import { setZoom } from "../slices/mapSlice";
 import { setCluster } from "../slices/activeClusterSlice";
 
 // Map Helper

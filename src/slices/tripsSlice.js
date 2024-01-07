@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import createTrip from "../utils/createTrip";
+import createTrip from "../utils/tripHelper";
 
 const initialTripsState = [];
 

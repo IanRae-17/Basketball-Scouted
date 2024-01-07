@@ -1,6 +1,3 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass, faFile } from "@fortawesome/free-solid-svg-icons";
-
 import Image from "../components/Image";
 import PlayerListActions from "./PlayerListActions";
 import useRefreshPlayer from "../hooks/useRefreshPlayer";
@@ -21,12 +18,6 @@ function PlayerCluster({ player }) {
       <div className="actions-wrapper">
         <PlayerListActions player={refreshedPlayer} />
       </div>
-
-      {/* <div className="player-actions">
-        <FontAwesomeIcon icon={faMagnifyingGlass} />
-        <FontAwesomeIcon icon={faFile} />
-        
-      </div> */}
     </div>
   );
 }
