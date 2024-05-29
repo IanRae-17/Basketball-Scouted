@@ -1,15 +1,13 @@
 # Basketball Scouted
 
-Basketball Scouted is a basketball management simulation game where users can select a city, manage their team, scout players, offer contracts, and simulate seasons. The goal is to build a competitive team by strategically scouting and signing players, and leading your team to success.
+Basketball Scouted is a basketball simulation game where users can select a city, scout players, and offer contracts to create their team. The goal is to illustrate what professional basketball teams might look like if they had a player recruitment process similar to European sports such as soccer and rugby.
 
-## Description
+## Features
 
-In Basketball Scouted, you will start by choosing a city to represent your team. Once your team is established, you can scout for players from various cities, offer contracts, and build your roster. The simulation features include:
-
-- **Player Scouting**: Scout players from different cities and assess their skills and potential.
+- **Player Scouting**: Send scouts to other cities worldwide to add new players to your scouting network.
 - **Contract Management**: Offer contracts to players and manage contract negotiations.
 - **Team Management**: Build and manage your team's roster by signing players to fill key positions.
-- **Simulation**: Simulate days and seasons to see how your team performs.
+- **Simulation**: Simulate days to fill 30 team rosters around the world.
 
 ## Technologies
 
@@ -24,4 +22,4 @@ Basketball Scouted is built with a modern web development stack, utilizing the f
 
 ## Demo
 
-You can view a live demo of the application [here](#).
+You can view a live demo of the application [here](https://basketball-scouted.vercel.app/).
